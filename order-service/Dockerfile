@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk AS builder
 
 COPY . .
 
-RUN ./mvnw package spring-boot:repackage
+RUN ./mvnw clean package spring-boot:repackage
 
 
 FROM eclipse-temurin:21
