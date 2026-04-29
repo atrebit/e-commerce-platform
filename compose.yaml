@@ -4,8 +4,8 @@ services:
         container_name: rabbitmq
         image: rabbitmq:4.3.0-management
         environment:
-          RABBITMQ_DEFAULT_USER: user
-          RABBITMQ_DEFAULT_PASS: password
+          RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+          RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
         ports:
             - 15672:15672 # UI
             - 5672:5672
@@ -14,6 +14,14 @@ services:
         build:
           context: ./order-service
           dockerfile: Dockerfile
+        environment:
+          SPRING_RABBITMQ_HOST: rabbitmq
+          SPRING_RABBITMQ_PORT: 5672
+          SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+          SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+          EXCHANGE_NAME: order.created
+          QUEUE_NAME: queue
+          ROUTING_KEY: order-queue
         ports:
           - 8081:8080
     inventory-service:

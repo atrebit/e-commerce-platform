@@ -1,1 +1,11 @@
-spring.application.name: order-service
+spring:
+    application.name: order-service
+    # rabbitmq:
+    #     host: "rabbitmq"
+    #     port: 5672
+    #     username: "user"
+    #     password: "password"
+application:
+    order-exchange: ${EXCHANGE_NAME}
+    order-queue: ${QUEUE_NAME}
+    order-routing-key: ${ROUTING_KEY}
