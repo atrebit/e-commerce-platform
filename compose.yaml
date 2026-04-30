@@ -36,6 +36,14 @@ services:
         build:
           context: ./notification-service
           dockerfile: Dockerfile
+        environment:
+          SPRING_RABBITMQ_HOST: rabbitmq
+          SPRING_RABBITMQ_PORT: 5672
+          SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+          SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+          EXCHANGE_NAME: order.created
+          QUEUE_NAME: queue
+          ROUTING_KEY: order-queue
         ports:
           - 8083:8080
     analytics-service:

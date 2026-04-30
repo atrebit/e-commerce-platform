@@ -1,1 +1,11 @@
-spring.application.name: notification-service
+spring:
+    application.name: notification-service
+    # rabbitmq:
+    #     host: "rabbitmq"
+    #     port: 5672
+    #     username: "user"
+    #     password: "password"
+application:
+    order-exchange: demo.exchange
+    order-queue: demo.queue
+    order-routing-key: demo.key
