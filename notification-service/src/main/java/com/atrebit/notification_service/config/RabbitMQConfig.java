@@ -13,29 +13,29 @@ import org.springframework.context.annotation.Configuration;
 @EnableRabbit
 public class RabbitMQConfig {
     
-    @Value("application.order-queue")
+    @Value("${application.order-queue}")
     public String queue;
 
-    @Value("application.order-exchange")
+    @Value("${application.order-exchange}")
     public String exchange;
 
-    @Value("application.order-routing-key")
+    @Value("${application.order-routing-key}")
     public String routingKey;
 
     @Bean
-    public Queue queue() {
+    public Queue ordersCreatedQueue() {
         return new Queue(queue, true);
     }
 
     @Bean
-    public DirectExchange exchange() {
+    public DirectExchange ordersExchange() {
         return new DirectExchange(exchange);
     }
 
     @Bean
     public Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue)
-                .to(exchange)
+        return BindingBuilder.bind(ordersCreatedQueue())
+                .to(ordersExchange())
                 .with(routingKey);
     }
 

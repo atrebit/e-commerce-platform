@@ -6,6 +6,6 @@ spring:
     #     username: "user"
     #     password: "password"
 application:
-    order-exchange: demo.exchange
-    order-queue: demo.queue
-    order-routing-key: demo.key
+    order-exchange: orders
+    order-queue: orders.created.queue
+    order-routing-key: orders.created
