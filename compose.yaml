@@ -29,6 +29,11 @@ services:
         build:
           context: ./inventory-service
           dockerfile: Dockerfile
+        environment:
+          SPRING_RABBITMQ_HOST: rabbitmq
+          SPRING_RABBITMQ_PORT: 5672
+          SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+          SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
         ports:
           - 8082:8080
     notification-service:
