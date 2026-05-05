@@ -9,6 +9,22 @@ services:
         ports:
             - 15672:15672 # UI
             - 5672:5672
+    odoo:
+      image: odoo:17.0
+      depends_on:
+        - mydb
+      ports:
+        - "8069:8069"
+      environment:
+        - HOST=mydb
+        - USER=odoo
+        - PASSWORD=myodoo
+    mydb:
+      image: postgres:15
+      environment:
+        - POSTGRES_DB=postgres
+        - POSTGRES_PASSWORD=myodoo
+        - POSTGRES_USER=odoo
     order-service:
         container_name: order-service
         build:
