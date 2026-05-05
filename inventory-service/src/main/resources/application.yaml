@@ -9,3 +9,9 @@ application:
     order-exchange: orders
     order-queue: orders.queue
     order-routing-key: orders.*
+    odoo:
+        database: odoo
+        host: ${APPLICATION_ODOO_HOST:odoo}
+        port: ${APPLICATION_ODOO_PORT:8069}
+        username: ${APPLICATION_ODOO_USERNAME:odoo@odoo.odoo}
+        password: ${APPLICATION_ODOO_PASSWORD:odoo}
