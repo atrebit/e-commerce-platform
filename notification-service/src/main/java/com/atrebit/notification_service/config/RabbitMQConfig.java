@@ -2,8 +2,8 @@ package com.atrebit.notification_service.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,12 +28,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public DirectExchange ordersExchange() {
-        return new DirectExchange(exchange);
+    public TopicExchange ordersExchange() {
+        return new TopicExchange(exchange);
     }
 
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
+    public Binding binding(Queue queue, TopicExchange exchange) {
         return BindingBuilder.bind(ordersCreatedQueue())
                 .to(ordersExchange())
                 .with(routingKey);

@@ -1,6 +1,6 @@
 package com.atrebit.order_service.config;
 
-import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +14,8 @@ public class RabbitMQConfig {
     public String exchange;
 
     @Bean
-    public DirectExchange orderExchange() {
-        return new DirectExchange(exchange);
+    public TopicExchange orderExchange() {
+        return new TopicExchange(exchange);
     }
 
 }
