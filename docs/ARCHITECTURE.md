@@ -28,7 +28,7 @@ The project intentionally grows through milestones. It does not start as a fully
 
 ## Current Architecture
 
-### Service Structure
+### Repository Structure
 
 ```text
 e-commerce-platform
@@ -36,56 +36,70 @@ e-commerce-platform
 ├── inventory-service
 ├── notification-service
 ├── analytics-service
-└── rabbitmq
-
+├── docs
+└── compose.yaml
 ```
+
+The Java services are maintained as separate application components. Supporting infrastructure and the external integration environment are orchestrated through Docker Compose.
 
 ### Current Components
 
-| Component              | Type                     | Responsibility                                                 |
-| ---------------------- | ------------------------ | -------------------------------------------------------------- |
-| `order-service`        | Java backend service     | Handles order-related functionality and publishes order events |
-| `inventory-service`    | Java backend service     | Handles product and stock-related functionality                |
-| `notification-service` | Java backend service     | Handles notification-related functionality                     |
-| `analytics-service`    | Java backend service     | Collects, processes or stores analytics-related data           |
-| `rabbitmq`             | Infrastructure component | Message broker for asynchronous service communication          |
-| Docker Compose         | Local runtime            | Starts the services and infrastructure locally                 |
+| Component | Type | Current Role |
+| --- | --- | --- |
+| `order-service` | Java / Spring Boot service | Produces order-related messages |
+| `inventory-service` | Java / Spring Boot service | Consumes order messages and currently contains the Odoo integration work |
+| `notification-service` | Java / Spring Boot service | Consumes order-related messages for notification processing |
+| `analytics-service` | Java / Spring Boot service | Application scaffold for future analytics functionality |
+| RabbitMQ | Infrastructure | Message broker for asynchronous communication |
+| Odoo 17 | External system | Local target system for the current external integration milestone |
+| PostgreSQL | Infrastructure | Database backing the local Odoo instance |
+| Docker Compose | Local orchestration | Starts application services and supporting infrastructure |
 
 ### Current Runtime View
 
 ```text
-Client
-  |
-  v
 order-service
-  |
-  v
-RabbitMQ
-  |
-  +--> inventory-service
-  |
-  +--> notification-service
-  |
-  +--> analytics-service
+     |
+     | order event
+     v
+ RabbitMQ
+     |
+     +----------------------+
+     |                      |
+     v                      v
+inventory-service     notification-service
+     |
+     | current integration work
+     v
+   Odoo 17
+     |
+     v
+ PostgreSQL
 ```
+
+The `analytics-service` is part of the repository and local Compose setup, but analytics event processing is not yet implemented.
+
+The external Odoo integration is currently under development as part of Milestone 3.
 
 ### Local Development
 
-The platform is currently designed to run locally with Docker Compose.
+The complete local environment is orchestrated with Docker Compose:
 
 ```bash
 docker compose up --build
 ```
 
-| Component              | Purpose                      |
-| ---------------------- | ---------------------------- |
-| `order-service`        | Order service runtime        |
-| `inventory-service`    | Inventory service runtime    |
-| `notification-service` | Notification service runtime |
-| `analytics-service`    | Analytics service runtime    |
-| `rabbitmq`             | Local message broker         |
+The current Compose setup includes:
 
----
+| Component | Purpose |
+| --- | --- |
+| `order-service` | Order-related backend service |
+| `inventory-service` | Inventory and current external-integration service |
+| `notification-service` | Notification-related backend service |
+| `analytics-service` | Analytics service scaffold |
+| RabbitMQ | Local message broker |
+| Odoo 17 | Local external integration target |
+| PostgreSQL | Odoo database |
 
 ## Communication Model
 
