@@ -25,9 +25,11 @@ The project focuses on:
 
 ![In Progress](https://img.shields.io/badge/status-in%20progress-blue)
 
-Early-stage portfolio project.
+The core multi-service structure and RabbitMQ-based messaging are implemented and runnable locally with Docker Compose.
 
-The current focus is on establishing the basic service structure, local Docker-based development and the technical roadmap for further backend, integration and DevOps features.
+The current development focus is **Milestone 3: External API Integration**, including the integration of an external ERP-like system into the order workflow, validation, integration boundaries and error handling.
+
+Further milestones extend the platform with object storage, API Gateway, container publishing, Kubernetes and observability.
 
 ## Architecture Overview
 
