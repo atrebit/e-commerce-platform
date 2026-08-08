@@ -1,42 +1,59 @@
 # Milestones
 
-This document summarizes the planned development milestones for the `e-commerce-platform` project.
+This document tracks the development milestones of the `e-commerce-platform` project.
 
-The project is intentionally milestone-based. Each milestone introduces one or more backend, integration, DevOps or cloud-native concepts and documents the technical progress of the platform.
+The project is intentionally milestone-based. Each milestone introduces a focused backend, integration, DevOps or cloud-native concept while keeping implemented functionality clearly separated from work in progress and planned extensions.
 
 ## Overview
 
-| Milestone | Focus                                   | Status                                                          |
-| --------- | --------------------------------------- | --------------------------------------------------------------- |
-| 1         | Basic service structure                 | ![Done](https://img.shields.io/badge/Done-brightgreen)          |
-| 2         | Messaging with RabbitMQ                 | ![Done](https://img.shields.io/badge/Done-brightgreen)          |
-| 3         | External API integration                | ![In Progress](https://img.shields.io/badge/In%20Progress-blue) |
-| 4         | Analytics data in S3-compatible storage | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
-| 5         | Spring Cloud API Gateway                | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
-| 6         | Container image publishing              | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
-| 7         | Optimized Java container builds         | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
-| 8         | Kubernetes                              | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
-| 9         | Observability stack                     | ![Planned](https://img.shields.io/badge/Planned-lightgrey)      |
+| Milestone | Focus | Status |
+| --- | --- | --- |
+| 1 | Basic service structure | ![Done](https://img.shields.io/badge/Done-brightgreen) |
+| 2 | Messaging with RabbitMQ | ![Done](https://img.shields.io/badge/Done-brightgreen) |
+| 3 | External system integration | ![In Progress](https://img.shields.io/badge/In%20Progress-blue) |
+| 4 | Analytics data in S3-compatible storage | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| 5 | Spring Cloud API Gateway | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| 6 | Container image publishing | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| 7 | Optimized Java container builds | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| 8 | Kubernetes | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
+| 9 | Observability stack | ![Planned](https://img.shields.io/badge/Planned-lightgrey) |
 
 ---
 
 ## Milestone 1: Basic Service Structure
 
+![Done](https://img.shields.io/badge/Done-brightgreen)
+
 ### Goal
 
 Establish the initial multi-service project structure and make the platform runnable in a local development environment.
 
-### Scope
+### Implementation Scope
 
-- create separate service folders
-- define basic responsibilities per service
-- provide initial Dockerfiles for services
-- configure local startup with Docker Compose
-- include RabbitMQ as the initial infrastructure component
+- create separate Spring Boot service modules
+- define initial responsibilities for each service
+- provide Dockerfiles for local container builds
+- configure local orchestration with Docker Compose
+- introduce RabbitMQ as the initial infrastructure component
+- establish the foundation for later integration and platform milestones
 
-### Expected Outcome
+### Implemented Components
 
-A locally runnable multi-service setup that provides the foundation for further backend and DevOps development.
+```text
+e-commerce-platform
+├── order-service
+├── inventory-service
+├── notification-service
+├── analytics-service
+├── docs
+└── compose.yaml
+```
+
+The local environment provides the application service structure and supporting infrastructure required for the following milestones.
+
+### Outcome
+
+A locally runnable multi-service Java backend foundation that can be extended incrementally without introducing all platform concerns at once.
 
 ### Status
 
@@ -46,32 +63,45 @@ A locally runnable multi-service setup that provides the foundation for further 
 
 ## Milestone 2: Messaging with RabbitMQ
 
+![Done](https://img.shields.io/badge/Done-brightgreen)
+
 ### Goal
 
-Introduce asynchronous communication between services using RabbitMQ.
+Introduce asynchronous communication between backend components using RabbitMQ.
 
-### Scope
+### Implementation Scope
 
-- publish order-related events from `order-service`
-- consume events in `inventory-service`
-- consume events in `notification-service`
-- optionally consume events in `analytics-service`
-- reduce direct synchronous dependencies between services
-- test event-driven communication locally
+- configure RabbitMQ exchanges, queues and bindings
+- provide an order-related message producer in `order-service`
+- consume order-related messages in `inventory-service`
+- consume order-related messages in `notification-service`
+- deserialize and process incoming messages
+- reduce direct runtime coupling between backend components
+- run the messaging infrastructure locally through Docker Compose
 
-### Example Flow
+### Implemented Messaging Structure
 
 ```text
 order-service
-  -> publishes order event
-    -> inventory-service updates stock
-    -> notification-service sends notification
-    -> analytics-service records analytics data
+  MessageProducer
+       |
+       v
+    RabbitMQ
+       |
+       +--> inventory-service
+       |
+       +--> notification-service
 ```
 
-### Expected Outcome
+The `order-service` contains the producer component required to publish order-related messages.
 
-A decoupled service interaction model based on message-driven communication.
+The `inventory-service` and `notification-service` contain RabbitMQ consumers.
+
+The `analytics-service` is intentionally not part of the current implemented consumer flow. Analytics event processing is planned for a later milestone.
+
+### Outcome
+
+The project contains the core components required for asynchronous message-driven communication between the order-related producer and multiple independent consumers.
 
 ### Status
 
@@ -79,24 +109,64 @@ A decoupled service interaction model based on message-driven communication.
 
 ---
 
-## Milestone 3: External API Integration
+## Milestone 3: External System Integration
+
+![In Progress](https://img.shields.io/badge/In%20Progress-blue)
 
 ### Goal
 
-Integrate an external system through API calls and compare different integration approaches.
+Integrate the platform with an external business system and establish a clear technical boundary between internal application logic and external-system communication.
 
-### Scope
+Odoo 17 is used as the local external integration target.
 
-- evaluate Odoo API access
-- implement direct HTTP requests for API calls
-- evaluate SDK-based access where suitable
-- compare direct HTTP integration with SDK-based integration
-- document technical trade-offs
-- avoid relying only on Spring-specific abstractions
+### Current Integration Direction
 
-### Expected Outcome
+```text
+RabbitMQ
+  |
+  v
+inventory-service
+  |
+  v
+OdooService
+  |
+  v
+Odoo 17
+  |
+  v
+PostgreSQL
+```
 
-A documented external API integration approach with clear reasoning behind the selected implementation style.
+### Implemented So Far
+
+- add Odoo 17 to the local Docker Compose environment
+- provide PostgreSQL for the local Odoo instance
+- consume order-related messages in `inventory-service`
+- delegate external-system communication to a dedicated `OdooService`
+- establish communication with Odoo through a Java/XML-RPC client
+- separate Odoo-specific integration concerns from RabbitMQ message consumption
+
+### Current Work
+
+- refine the external order integration flow
+- map internal order-related data to appropriate Odoo business objects
+- define the required external operations
+- validate integration boundaries
+- improve external communication error handling
+- document technical decisions and trade-offs
+
+### Remaining Work
+
+- implement the intended end-to-end external order workflow
+- validate business-level responses from Odoo
+- improve handling of unavailable or failing external dependencies
+- define retry or recovery behavior where appropriate
+- add integration-focused tests
+- document the completed integration flow
+
+### Outcome
+
+A documented and working integration path between the platform and Odoo with external-system-specific logic isolated behind a dedicated integration boundary.
 
 ### Status
 
@@ -106,22 +176,41 @@ A documented external API integration approach with clear reasoning behind the s
 
 ## Milestone 4: Analytics Data in S3-Compatible Storage
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Store analytics data in an S3-compatible object storage instead of keeping all data inside application services.
+Introduce analytics event processing and persist structured analytics data in S3-compatible object storage.
 
-### Scope
+### Planned Scope
 
-- start a local S3-compatible server
+- implement analytics event consumption in `analytics-service`
+- start an S3-compatible object storage service locally
 - create an analytics bucket
 - integrate an S3-compatible SDK
-- write analytics data into the bucket
-- define a simple object naming strategy
-- document the storage approach
+- transform analytics-relevant events into structured objects
+- persist analytics data outside the application runtime
+- define an object naming and organization strategy
+- document storage behavior and design decisions
+
+### Planned Flow
+
+```text
+RabbitMQ
+  |
+  v
+analytics-service
+  |
+  v
+structured analytics data
+  |
+  v
+S3-compatible object storage
+```
 
 ### Expected Outcome
 
-The `analytics-service` can write structured analytics data into object storage.
+The `analytics-service` can consume analytics-relevant events and persist structured data in S3-compatible object storage.
 
 ### Status
 
@@ -131,21 +220,41 @@ The `analytics-service` can write structured analytics data into object storage.
 
 ## Milestone 5: Spring Cloud API Gateway
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Introduce a central API entry point for routing requests to the backend services.
+Introduce a central API entry point for routing external requests to backend services.
 
-### Scope
+### Planned Scope
 
 - add a Spring Cloud Gateway service
-- define routes for the backend services
-- route external requests through the gateway
-- keep service-specific endpoints behind a central entry point
-- prepare the project for later Kubernetes ingress and gateway concepts
+- define routes for backend services
+- route external requests through a central entry point
+- reduce direct exposure of individual service ports
+- prepare the architecture for later Kubernetes ingress concepts
+- provide a location for future cross-cutting concerns
+
+Possible route structure:
+
+| Route | Target Service |
+| --- | --- |
+| `/orders/**` | `order-service` |
+| `/inventory/**` | `inventory-service` |
+| `/notifications/**` | `notification-service` |
+| `/analytics/**` | `analytics-service` |
+
+Possible later gateway concerns include:
+
+- authentication
+- authorization
+- request logging
+- rate limiting
+- centralized error handling
 
 ### Expected Outcome
 
-The platform has a central API Gateway that routes requests to the internal backend services.
+The platform exposes a central API entry point that routes requests to internal backend services.
 
 ### Status
 
@@ -155,22 +264,25 @@ The platform has a central API Gateway that routes requests to the internal back
 
 ## Milestone 6: Container Image Publishing
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Publish container images so that services can be downloaded, reused and deployed without local image builds.
+Publish versioned container images so that individual services can be reused and deployed without rebuilding them from local source code.
 
-### Scope
+### Planned Scope
 
-- build Docker images for all services
-- define image names and tags
+- build container images for application services
+- define consistent image names
+- define a versioning and tagging strategy
 - publish images to a container registry
 - document pull and run instructions
-- prepare images for deployment scenarios
-- establish versioned image availability
+- prepare images for later deployment scenarios
+- make deployment artifacts independent from local source builds
 
 ### Expected Outcome
 
-The services are available as versioned container images and can be deployed without rebuilding the source code locally.
+Application services are available as versioned container images through a container registry.
 
 ### Status
 
@@ -180,22 +292,26 @@ The services are available as versioned container images and can be deployed wit
 
 ## Milestone 7: Optimized Java Container Builds
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Compare and evaluate different approaches for building smaller and more efficient Java container images.
+Evaluate different approaches for building smaller and more efficient Java container images.
 
-### Scope
+### Planned Scope
 
-- compare classic Dockerfile-based image builds
-- evaluate Maven plugin-based image builds
+- review the existing Dockerfile-based approach
+- evaluate multi-stage container builds
+- evaluate Maven plugin-based image generation
 - inspect resulting image sizes
-- analyze build time and runtime behavior
-- evaluate optimized runtime images
-- document trade-offs between simplicity and image optimization
+- compare build times
+- evaluate runtime image size and structure
+- document trade-offs between transparency, simplicity and optimization
+- select an appropriate strategy for the project
 
 ### Expected Outcome
 
-A documented comparison of Java container build approaches with a selected strategy for this project.
+A documented comparison of Java container build approaches and a justified build strategy for the platform.
 
 ### Status
 
@@ -205,22 +321,45 @@ A documented comparison of Java container build approaches with a selected strat
 
 ## Milestone 8: Kubernetes
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Move from local Docker Compose execution towards Kubernetes-based deployment.
+Move from Docker Compose-based local execution towards Kubernetes-oriented deployment.
 
-### Scope
+### Planned Scope
 
 - create Kubernetes manifests
-- deploy services to a local Kubernetes cluster
-- configure service discovery inside Kubernetes
-- configure internal service communication
-- prepare deployment structures for the API Gateway and backend services
-- document deployment and troubleshooting steps
+- deploy application services to a local Kubernetes cluster
+- configure Kubernetes Services
+- introduce internal service discovery
+- configure service-to-service connectivity
+- deploy required infrastructure components
+- integrate the planned API Gateway
+- expose selected APIs through a centralized entry point
+- document deployment and troubleshooting procedures
+
+### Planned Direction
+
+```text
+Kubernetes Cluster
+  |
+  +--> api-gateway
+  |
+  +--> order-service
+  |
+  +--> inventory-service
+  |
+  +--> notification-service
+  |
+  +--> analytics-service
+  |
+  +--> rabbitmq
+```
 
 ### Expected Outcome
 
-The platform can be deployed in a Kubernetes-oriented environment.
+The platform can be deployed and operated in a local Kubernetes-oriented environment instead of relying exclusively on Docker Compose.
 
 ### Status
 
@@ -230,24 +369,37 @@ The platform can be deployed in a Kubernetes-oriented environment.
 
 ## Milestone 9: Observability Stack
 
+![Planned](https://img.shields.io/badge/Planned-lightgrey)
+
 ### Goal
 
-Introduce production-oriented observability concepts for monitoring, logging, tracing and alerting.
+Introduce observability concepts for inspecting service health, runtime behavior, failures and performance.
 
-### Scope
+### Planned Scope
 
-- expose service metrics
+- expose application metrics
 - collect metrics with Prometheus
-- visualize metrics in Grafana
-- collect logs with Loki
-- add distributed tracing with Tempo
+- visualize metrics with Grafana
+- centralize logs with Loki
+- introduce distributed tracing with Tempo
 - configure basic alerting with Alertmanager
 - create initial dashboards
+- add relevant service health information
 - document observability setup and usage
+
+### Planned Stack
+
+| Tool | Purpose |
+| --- | --- |
+| Prometheus | Metrics collection |
+| Grafana | Dashboards and visualization |
+| Loki | Log aggregation |
+| Tempo | Distributed tracing |
+| Alertmanager | Alerting |
 
 ### Expected Outcome
 
-A basic observability setup that makes service behavior, failures and performance easier to inspect.
+A basic observability environment that provides visibility into service behavior through metrics, logs, traces and alerts.
 
 ### Status
 
@@ -257,26 +409,43 @@ A basic observability setup that makes service behavior, failures and performanc
 
 ## Long-Term Project Direction
 
-The milestones are designed to grow the project from a basic multi-service backend into a more realistic platform architecture.
+The milestones progressively extend the project from a local multi-service backend into a broader platform architecture.
 
-The long-term direction includes:
+The long-term technical direction includes:
 
-- service-oriented backend development
+- Java / Spring Boot backend development
+- REST-based application interfaces
 - asynchronous communication
-- external system integration
+- external business system integration
+- analytics event processing
 - object storage
-- API Gateway usage
+- API Gateway routing
 - container image publishing
-- optimized Java builds
-- Kubernetes deployment
-- observability
-- DevOps-oriented documentation
+- optimized Java container builds
+- Kubernetes-oriented deployment
+- metrics, logging, tracing and alerting
+- integration testing
+- resilience and failure-handling concepts
+- DevOps-oriented technical documentation
+
+The roadmap intentionally introduces these concepts incrementally instead of presenting planned functionality as already implemented.
+
+---
 
 ## Status Legend
 
-| Status                                                          | Description                                                    |
-| --------------------------------------------------------------- | -------------------------------------------------------------- |
-| ![Planned](https://img.shields.io/badge/Planned-lightgrey)      | Planned concept or upcoming implementation step                |
-| ![In Progress](https://img.shields.io/badge/In%20Progress-blue) | Currently being designed, implemented or documented            |
-| ![Done](https://img.shields.io/badge/Done-brightgreen)          | Implemented, tested and documented                             |
-| ![Deferred](https://img.shields.io/badge/Deferred-orange)       | Intentionally postponed because another milestone has priority |
+| Status | Description |
+| --- | --- |
+| ![Planned](https://img.shields.io/badge/Planned-lightgrey) | Planned concept or upcoming implementation step |
+| ![In Progress](https://img.shields.io/badge/In%20Progress-blue) | Currently being designed, implemented or documented |
+| ![Done](https://img.shields.io/badge/Done-brightgreen) | Milestone scope implemented to the level defined for the project |
+| ![Deferred](https://img.shields.io/badge/Deferred-orange) | Intentionally postponed because another milestone has priority |
+
+---
+
+## Related Documentation
+
+| Document | Purpose |
+| --- | --- |
+| [README.md](../README.md) | Project overview, local setup and current project status |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Current architecture, planned target architecture and technical decisions |
